@@ -52,7 +52,6 @@ model StudentProfile {
   sessions                       Session[]
   user                           User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscriptions                  Subscription[]
-  codingSubmissions              CodingSubmission[]
 
   @@map("student_profiles")
 }
@@ -201,63 +200,6 @@ model manual_booking_requests {
   student_profiles         StudentProfile      @relation(fields: [student_id], references: [id], onDelete: Cascade)
 }
 
-model CodingQuestion {
-  id          Int             @id @default(autoincrement())
-  title       String
-  slug        String          @unique
-  description String
-  difficulty  DifficultyLevel
-  category    String
-  tags        String[]
-  constraints String?
-  examples    Json
-  testCases   Json
-  starterCode Json
-  solution    String?
-  hints       String[]
-  isActive    Boolean         @default(true)
-  orderIndex  Int             @default(0)
-  createdAt   DateTime        @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
-
-  submissions CodingSubmission[]
-
-  @@map("coding_questions")
-}
-
-model CodingSubmission {
-  id          Int              @id @default(autoincrement())
-  studentId   Int              @map("student_id")
-  questionId  Int              @map("question_id")
-  language    String
-  code        String
-  status      SubmissionStatus @default(PENDING)
-  runtime     Int?
-  memory      Int?
-  testsPassed Int              @default(0) @map("tests_passed")
-  totalTests  Int              @default(0) @map("total_tests")
-  errorOutput String?          @map("error_output")
-  createdAt   DateTime         @default(now()) @map("created_at")
-
-  student  StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  question CodingQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@map("coding_submissions")
-}
-enum SubmissionStatus {
-  PENDING
-  ACCEPTED
-  WRONG_ANSWER
-  TIME_LIMIT_EXCEEDED
-  RUNTIME_ERROR
-  COMPILE_ERROR
-}
-enum UserRole {
-  STUDENT
-  INTERVIEWER
-  ADMIN
-}
-
 enum AuthProvider {
   EMAIL
   GOOGLE
@@ -280,11 +222,6 @@ enum SessionStatus {
   CANCELLED
 }
 
-enum DifficultyLevel {
-  EASY
-  MEDIUM
-  HARD
-}
 
 enum InterviewType {
   TECHNICAL
