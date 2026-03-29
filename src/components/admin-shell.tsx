@@ -9,7 +9,6 @@ const navItems = [
   { href: '/admin/interviewers', label: 'Interviewers' },
   { href: '/admin/analytics', label: 'Analytics' },
   { href: '/admin/config', label: 'Config' },
-  { href: '/admin/coding', label: 'Coding' },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
