@@ -11,46 +11,46 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'PENDING';
 
-    const requests = await prisma.manual_booking_requests.findMany({
+    const requests = await prisma.manualBookingRequest.findMany({
       where: status === 'ALL' ? {} : { status: status as any },
       include: {
-        student_profiles: {
+        studentProfile: {
           include: {
             user: { select: { email: true, name: true, profilePicture: true } },
           },
         },
-        interviewer_profiles: {
+        interviewerProfile: {
           include: {
             user: { select: { email: true, name: true, profilePicture: true } },
           },
         },
-        sessions: true,
+        session: true,
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     const normalized = requests.map((request) => ({
       id: request.id,
       status: request.status,
-      sessionType: request.session_type,
+      sessionType: request.sessionType,
       role: request.role,
       difficulty: request.difficulty,
-      interviewType: request.interview_type,
+      interviewType: request.interviewType,
       topic: request.topic,
-      paymentStatus: request.payment_status,
-      createdAt: request.created_at,
-      preferredInterviewerId: request.preferred_interviewer_id,
+      paymentStatus: request.paymentStatus,
+      createdAt: request.createdAt,
+      preferredInterviewerId: request.preferredInterviewerId,
       student: {
-        name: request.student_profiles.name,
-        user: request.student_profiles.user,
+        name: request.studentProfile.name,
+        user: request.studentProfile.user,
       },
-      preferredInterviewer: request.interviewer_profiles
+      preferredInterviewer: request.interviewerProfile
         ? {
-            name: request.interviewer_profiles.name,
-            user: request.interviewer_profiles.user,
+            name: request.interviewerProfile.name,
+            user: request.interviewerProfile.user,
           }
         : null,
-      session: request.sessions ? { id: request.sessions.id } : null,
+      session: request.session ? { id: request.session.id } : null,
     }));
 
     return NextResponse.json({ requests: normalized });
@@ -78,10 +78,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const manualRequest = await prisma.manual_booking_requests.findUnique({
+    const manualRequest = await prisma.manualBookingRequest.findUnique({
       where: { id: requestId },
       include: {
-        student_profiles: {
+        studentProfile: {
           include: { user: { select: { email: true, name: true } } },
         },
       },
@@ -101,32 +101,32 @@ export async function POST(request: NextRequest) {
 
     const session = await prisma.session.create({
       data: {
-        studentId: manualRequest.student_id,
+        studentId: manualRequest.studentId,
         interviewerId,
-        sessionType: manualRequest.session_type,
+        sessionType: manualRequest.sessionType,
         status: 'SCHEDULED',
         scheduledTime: new Date(scheduledTime),
         durationMinutes,
         topic: manualRequest.topic || null,
         role: manualRequest.role || null,
         difficulty: manualRequest.difficulty || null,
-        interviewType: manualRequest.interview_type || null,
+        interviewType: manualRequest.interviewType || null,
       },
     });
 
-    await prisma.manual_booking_requests.update({
+    await prisma.manualBookingRequest.update({
       where: { id: manualRequest.id },
       data: {
         status: 'ASSIGNED',
-        preferred_interviewer_id: interviewerId,
-        session_id: session.id,
+        preferredInterviewerId: interviewerId,
+        sessionId: session.id,
       },
     });
 
     await prisma.studentProfile.update({
-      where: { id: manualRequest.student_id },
+      where: { id: manualRequest.studentId },
       data:
-        manualRequest.session_type === 'INTERVIEW'
+        manualRequest.sessionType === 'INTERVIEW'
           ? { interviewsUsed: { increment: 1 } }
           : { guidanceUsed: { increment: 1 } },
     });

@@ -203,44 +203,6 @@ model ManualBookingRequest {
   @@map("manual_booking_requests")
 }
 
-model coding_questions {
-  id                 Int                  @id @default(autoincrement())
-  title              String
-  slug               String               @unique
-  description        String
-  difficulty         DifficultyLevel
-  category           String
-  tags               String[]
-  constraints        String?
-  examples           Json
-  testCases          Json
-  starterCode        Json
-  solution           String?
-  hints              String[]
-  isActive           Boolean              @default(true)
-  orderIndex         Int                  @default(0)
-  created_at         DateTime             @default(now())
-  updated_at         DateTime
-  coding_submissions coding_submissions[]
-}
-
-model coding_submissions {
-  id               Int              @id @default(autoincrement())
-  student_id       Int
-  question_id      Int
-  language         String
-  code             String
-  status           SubmissionStatus @default(PENDING)
-  runtime          Int?
-  memory           Int?
-  tests_passed     Int              @default(0)
-  total_tests      Int              @default(0)
-  error_output     String?
-  created_at       DateTime         @default(now())
-  coding_questions coding_questions @relation(fields: [question_id], references: [id], onDelete: Cascade)
-  student_profiles StudentProfile   @relation(fields: [student_id], references: [id], onDelete: Cascade)
-}
-
 enum UserRole {
   STUDENT
   INTERVIEWER
@@ -317,13 +279,4 @@ enum DifficultyLevel {
   EASY
   MEDIUM
   HARD
-}
-
-enum SubmissionStatus {
-  PENDING
-  ACCEPTED
-  WRONG_ANSWER
-  TIME_LIMIT_EXCEEDED
-  RUNTIME_ERROR
-  COMPILE_ERROR
 }
