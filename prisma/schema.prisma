@@ -48,7 +48,6 @@ model StudentProfile {
   planType                     PlanType               @default(FREE) @map("plan_type")
   resumeUrl                    String?                @map("resume_url")
   preferredInterviewerUnlocked Boolean                @default(false) @map("preferred_interviewer_unlocked")
-  coding_submissions           coding_submissions[]
   manualBookingRequests        ManualBookingRequest[]
   sessions                     Session[]
   user                         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
